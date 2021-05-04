@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -44,6 +43,10 @@ func sfbs(w http.ResponseWriter, req *http.Request) {
 	http.ServeFile(w, req, "templates/assets/bootstrap/css/bootstrap.min.css")
 }
 
+func sfbj(w http.ResponseWriter, req *http.Request) {
+	http.ServeFile(w, req, "templates/assets/bootstrap/js/bootstrap.min.js")
+}
+
 func sfnv(w http.ResponseWriter, req *http.Request) {
 	http.ServeFile(w, req, "templates/assets/css/Navigation-Clean.css")
 }
@@ -58,6 +61,7 @@ func main() {
 	http.HandleFunc("/", index)
 	http.HandleFunc("/details", details)
 	http.HandleFunc("/assets/bootstrap/css/bootstrap.min.css", sfbs)
+	http.HandleFunc("/assets/bootstrap/js/bootstrap.min.js", sfbj)
 	http.HandleFunc("/assets/css/Navigation-Clean.css", sfnv)
 	http.HandleFunc("/assets/css/styles.css", sfst)
 	http.HandleFunc("/assets/js/jquery.min.js", sfjq)
@@ -135,7 +139,6 @@ func details(w http.ResponseWriter, req *http.Request) {
 		err = json.Unmarshal(fdata, &DataStruct)
 		checkErr(err)
 	}
-	fmt.Print(DataStruct)
 	err = tpl.ExecuteTemplate(w, "details.gohtml", DataStruct)
 	checkErr(err)
 }

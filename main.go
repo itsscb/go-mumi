@@ -1,8 +1,8 @@
 package main
 
 import (
-	//"fmt"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -21,6 +21,7 @@ type ds struct {
 type tplData struct {
 	Data  map[string]DB
 	Datum string
+	Zeit  string
 	Summe int
 }
 
@@ -61,7 +62,7 @@ func main() {
 	http.HandleFunc("/assets/css/styles.css", sfst)
 	http.HandleFunc("/assets/js/jquery.min.js", sfjq)
 	http.Handle("/favicon.ico", http.NotFoundHandler())
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8081", nil)
 }
 
 func index(w http.ResponseWriter, req *http.Request) {
@@ -79,10 +80,11 @@ func index(w http.ResponseWriter, req *http.Request) {
 
 	fm := req.FormValue("Menge")
 	ft := req.FormValue("Date")
+	fz := req.FormValue("Time")
 
 	if len(fm) >= 1 {
 		m, _ = strconv.Atoi(fm)
-		t = string2time(ft, "2006-01-02T15:04")
+		t = string2time((ft + "T" + fz), "2006-01-02T15:04")
 		if dt, ok := DataStruct[t.Format("2006-01-02")]; ok {
 			dt.Datensaetze = append(dt.Datensaetze, ds{
 				Datum:    t,
@@ -105,6 +107,7 @@ func index(w http.ResponseWriter, req *http.Request) {
 		}
 	} else {
 		t = time.Now()
+		fz = t.Format("15:04")
 		m = 0
 	}
 
@@ -116,7 +119,8 @@ func index(w http.ResponseWriter, req *http.Request) {
 	}
 	td = tplData{
 		Data:  DataStruct,
-		Datum: t.Format("2006-01-02T15:04"),
+		Datum: t.Format("2006-01-02"),
+		Zeit:  fz,
 		Summe: sum,
 	}
 	err = tpl.ExecuteTemplate(w, "index.gohtml", td)
@@ -131,7 +135,7 @@ func details(w http.ResponseWriter, req *http.Request) {
 		err = json.Unmarshal(fdata, &DataStruct)
 		checkErr(err)
 	}
-
+	fmt.Print(DataStruct)
 	err = tpl.ExecuteTemplate(w, "details.gohtml", DataStruct)
 	checkErr(err)
 }

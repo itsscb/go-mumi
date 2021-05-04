@@ -66,7 +66,7 @@ func main() {
 	http.HandleFunc("/assets/css/styles.css", sfst)
 	http.HandleFunc("/assets/js/jquery.min.js", sfjq)
 	http.Handle("/favicon.ico", http.NotFoundHandler())
-	http.ListenAndServe(":8081", nil)
+	http.ListenAndServe(":8080", nil)
 }
 
 func index(w http.ResponseWriter, req *http.Request) {

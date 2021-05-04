@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" style="color: rgb(255,255,255);">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>go-mumi</title>
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&amp;display=swap">
+    <link rel="stylesheet" href="assets/css/Navigation-Clean.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+
+<body style="background: rgb(0,0,0);">
+    <nav class="navbar navbar-light navbar-expand-md navigation-clean" style="background: rgb(0,0,0);color: rgb(255,255,255);">
+        <div class="container"><a class="navbar-brand" href="/">MuMi Collector</a><button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navcol-1">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"><a class="nav-link" href="/" style="color: rgb(255,255,255);">Collector</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/details" style="color: rgb(255,255,255);">Details</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <h3 class="text-center">Collect your MuMi</h3>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th class="text-center">Day</th>
+                        <th>Total of Day</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range $i, $e := .Data }}
+                    <tr>
+                        <td style="font-weight: normal;text-align: center;">
+                            <h5>{{ .Date }}</h5>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Pumping Session</th>
+                                            <th>Amount in ml</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{ range $in, $el := $e.Datensaetze}}
+                                        <tr>
+                                            <td>{{ $el.DatumStr }}</td>
+                                            <td>{{ $el.Menge }} ml</td>
+                                        </tr>
+                                        {{ end }}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                        <td style="text-align: left;font-weight: bold;">
+                            <h5><strong>{{ .Summe }} ml</strong></h5>
+                        </td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+        <form method="POST">
+            <input class="form-control" type="datetime-local" name="Date" value="{{ .Datum }}" style="margin-bottom: 2rem;">
+            <input autofocus class="form-control" type="text" name="Menge" placeholder="Menge" style="margin-bottom: 2rem;">
+            <button name="speichern" class="btn btn-primary" type="submit" style="width: 100%;">Submit</button>
+        </form>
+    </div>
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+</body>
+
+</html>

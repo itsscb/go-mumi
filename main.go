@@ -2,38 +2,32 @@ package main
 
 import (
 	//"fmt"
-	"log"
-	"net/http"
-	"text/template"
-	"strconv"
-	"time"
 	"encoding/json"
 	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
+	"strconv"
+	"text/template"
+	"time"
 )
 
-
 type ds struct {
-	Datum time.Time
+	Datum    time.Time
 	DatumStr string
-	Menge int
-}
-
-type dsstring struct {
-	Datum string
-	Menge int
+	Menge    int
 }
 
 type tplData struct {
-	Data map[string]DB
+	Data  map[string]DB
 	Datum string
 	Summe int
 }
 
 type DB struct {
 	Datensaetze []ds
-	Date string
-	Summe int
+	Date        string
+	Summe       int
 }
 
 var DataStruct = map[string]DB{}
@@ -70,7 +64,6 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 
-
 func index(w http.ResponseWriter, req *http.Request) {
 	var td tplData
 	var m int
@@ -84,30 +77,29 @@ func index(w http.ResponseWriter, req *http.Request) {
 		checkErr(err)
 	}
 
-	fm := req.FormValue("menge")
-	ft := req.FormValue("datum")
+	fm := req.FormValue("Menge")
+	ft := req.FormValue("Date")
 
-	if len(fm) >= 1{
+	if len(fm) >= 1 {
 		m, _ = strconv.Atoi(fm)
-		t = string2time(ft, "2006-01-02T15:04") 
+		t = string2time(ft, "2006-01-02T15:04")
 		if dt, ok := DataStruct[t.Format("2006-01-02")]; ok {
-			dt.Datensaetze = append(dt.Datensaetze, ds {
-					Datum: t,
-					DatumStr: t.Format(layout),
-					Menge: m,
+			dt.Datensaetze = append(dt.Datensaetze, ds{
+				Datum:    t,
+				DatumStr: t.Format(layout),
+				Menge:    m,
 			})
 			dt.Summe = dt.Summe + m
 			DataStruct[t.Format("2006-01-02")] = dt
 		} else {
 			DataStruct[t.Format("2006-01-02")] = DB{
-				Datensaetze: []ds{
-					ds{
-						Datum: t,
-						DatumStr: t.Format(layout),
-						Menge: m,
-					},
+				Datensaetze: []ds{{
+					Datum:    t,
+					DatumStr: t.Format(layout),
+					Menge:    m,
 				},
-				Date: t.Format("2006-01-02"),
+				},
+				Date:  t.Format("2006-01-02"),
 				Summe: m,
 			}
 		}
@@ -118,18 +110,17 @@ func index(w http.ResponseWriter, req *http.Request) {
 
 	file, _ := json.MarshalIndent(DataStruct, "", " ")
 	_ = ioutil.WriteFile("data.json", file, 0644)
-	
+
 	for _, d := range DataStruct[time.Now().Format("2006-01-02")].Datensaetze {
 		sum += d.Menge
 	}
 	td = tplData{
-		Data: DataStruct,
+		Data:  DataStruct,
 		Datum: t.Format("2006-01-02T15:04"),
 		Summe: sum,
 	}
 	err = tpl.ExecuteTemplate(w, "index.gohtml", td)
 	checkErr(err)
-	return
 }
 
 func details(w http.ResponseWriter, req *http.Request) {
@@ -143,7 +134,6 @@ func details(w http.ResponseWriter, req *http.Request) {
 
 	err = tpl.ExecuteTemplate(w, "details.gohtml", DataStruct)
 	checkErr(err)
-	return
 }
 
 func checkErr(err error) {

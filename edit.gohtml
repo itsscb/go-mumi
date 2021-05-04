@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html style="background: #000000;">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>webmin</title>
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/Navigation-Clean.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+
+<body style="background: rgba(255,255,255,0);">
+    <nav class="navbar navbar-light navbar-expand-md navigation-clean" style="color: rgb(255,255,255);background: rgb(0,0,0);">
+        <div class="container"><a class="navbar-brand" href="#" style="font-size: 30px;">IT/ORG Wareneingang</a><button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button></div>
+    </nav>
+    <div style="color: rgb(255,255,255);background: rgb(0,0,0);">
+        <div class="container" style="margin-bottom: 5rem;">
+                <div class="d-flex flex-wrap justify-content-xl-center">
+                    <div style="margin: 1rem;">
+                        <h4 class="text-center" style="margin-top: 1rem;">Wareneingang</h4>
+                        <table style="width 100%">
+                            <tr>
+                                <th>Warenkorb</th>
+                                <th>Typ</th>
+                                <th>Hersteller</th>
+                                <th>Modell</th>
+                                <th>Seriennummer</th>
+                                <th>MAC / IMEI</th>
+                            </tr>
+                            {{ if . }}
+                            {{ range .Wareneingang }}
+                            <tr>
+                                <form method="POST" style="color: rgb(255,255,255);" name="{{ .Seriennummer }}">
+                                    <td><input class="form-control" type="text" style="margin-top: 2rem;" placeholder="Warenkorb" name="warenkorb" value="{{ .Warenkorb }}"></td>
+                                    <td><input class="form-control" type="text" style="margin-top: 2rem;" placeholder="Typ" name="typ" value="{{ .Typ }}"></td>
+                                    <td><input class="form-control" type="text" style="margin-top: 2rem;" placeholder="Hersteller" name="hersteller" value="{{ .Hersteller }}"></td>
+                                    <td><input class="form-control" type="text" style="margin-top: 2rem;" placeholder="Modell" name="modell" value="{{ .Modell }}"></td>
+                                    <td><input class="form-control" type="text" style="margin-top: 2rem;" placeholder="Seriennummer" name="seriennummer" value="{{ .Seriennummer }}"></td>
+                                    <td><input class="form-control" type="text" style="margin-top: 2rem;" placeholder="MAC" name="MAC" value="{{ .MAC }}"></td>
+                                                            
+                                    <td><button name="speichern" class="btn btn-primary" type="submit" style="margin-top: 2rem;width: 100%;background: rgb(37,82,1);border-color: rgb(37,82,1);">Eintrag speichern</button></td>
+                                    <input class="form-check-input" type="radio" checked="checked" name="{{ .Seriennummer }}" value="save" style="visibility: hidden">
+                                </form>
+                            </tr>
+                            {{ end }}
+                            {{ end }}
+                        </table>
+                        
+                        <form method="POST" style="color: rgb(255,255,255);" name="edit">
+                            <div class="form-check" style="visibility: hidden;"><input class="form-check-input" type="radio" id="bearbeiten" name="bearbeiten" value="true" checked="checked"><label class="form-check-label" for="bearbeiten">Einträge bearbeiten</label></div> 
+                            <button name="abschliessen" class="btn btn-primary" type="submit" style="margin-top: 2rem;width: 100%;background: rgb(37,82,1);border-color: rgb(37,82,1);">Einträge bearbeiten</button>
+                        </form>
+                    </div>
+                </div>
+        </div>
+    </div>
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+</body>
+
+</html>

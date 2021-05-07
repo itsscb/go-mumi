@@ -29,7 +29,7 @@
                 <thead>
                     <tr>
                         <th class="text-center">Day</th>
-                        <th>Total of Day</th>
+                        <th>Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,10 +46,16 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {{ range $in, $el := $e.Datensaetze}}
+                                        {{ range $in, $el := $e.Datasets}}
                                         <tr>
-                                            <td>{{ $el.DatumStr }}</td>
-                                            <td>{{ $el.Menge }} ml</td>
+                                            <td>{{ $el.DateStr }}</td>
+                                            <td>{{ $el.Amount }} ml</td>
+                                            <td>
+                                                <form method="POST">
+                                                    <input hidden name="{{ $el.DateStr }}@{{ $el.Amount }}" type="text" value="{{ $el.DateStr }}@{{ $el.Amount }}"/>
+                                                    <button name="speichern" class="btn btn-primary" type="submit" style="width: 100%; margin-bottom: 2rem;">Delete</button>
+                                                </form>
+                                            </td>
                                         </tr>
                                         {{ end }}
                                     </tbody>
@@ -57,7 +63,7 @@
                             </div>
                         </td>
                         <td style="text-align: left;font-weight: bold;">
-                            <h5><strong>{{ .Summe }} ml</strong></h5>
+                            <h5><strong>{{ .Sum }} ml</strong></h5>
                         </td>
                     </tr>
                     {{ end }}

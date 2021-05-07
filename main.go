@@ -12,28 +12,29 @@ import (
 )
 
 type ds struct {
-	Datum    time.Time
-	DatumStr string
-	Menge    int
+	Date    time.Time
+	DateStr string
+	Amount    int
 }
 
 type tplData struct {
-	Data  map[string]DB
-	Datum string
-	Zeit  string
-	Summe int
+	Data  []DB
+	Date string
+	Time  string
+	Sum int
 }
 
 type DB struct {
-	Datensaetze []ds
+	Datasets []ds
 	Date        string
-	Summe       int
+	Sum       int
 }
 
 var DataStruct = map[string]DB{}
 
 var tpl *template.Template
 var layout = "02.01.2006 15:04"
+var laydt = "2006-01-02"
 
 func init() {
 	tpl = template.Must(template.ParseGlob("templates/*.gohtml"))
@@ -82,50 +83,78 @@ func index(w http.ResponseWriter, req *http.Request) {
 		checkErr(err)
 	}
 
-	fm := req.FormValue("Menge")
+	fm := req.FormValue("Amount")
 	ft := req.FormValue("Date")
 	fz := req.FormValue("Time")
+
+	for _, fo := range DataStruct {
+		for i, fi := range fo.Datasets {
+			form := req.FormValue(fi.DateStr +"@" +strconv.Itoa(fi.Amount))
+			ddate := fi.Date.Format(laydt) 
+			if len(form) >= 1 {
+				tmpslice := DataStruct[ddate]
+				if len(tmpslice.Datasets) >= 2 {
+					tmpslice.Datasets = append(tmpslice.Datasets[:i], tmpslice.Datasets[i+1:]...)
+				} else if len(tmpslice.Datasets) == i {
+					tmpslice.Datasets = tmpslice.Datasets[:i]
+				} else {
+					tmpslice.Datasets = tmpslice.Datasets[i+1:]
+				}
+				if len(tmpslice.Datasets) != 0 {
+					tmpslice.Sum -= fi.Amount
+					DataStruct[ddate] = tmpslice
+				} else {
+					delete(DataStruct, ddate)
+				}
+				file, _ := json.MarshalIndent(DataStruct, "", " ")
+				_ = ioutil.WriteFile("data.json", file, 0644)
+				break
+			}
+		}
+	}
 
 	if len(fm) >= 1 {
 		m, _ = strconv.Atoi(fm)
 		t = string2time((ft + "T" + fz), "2006-01-02T15:04")
-		if dt, ok := DataStruct[t.Format("2006-01-02")]; ok {
-			dt.Datensaetze = append(dt.Datensaetze, ds{
-				Datum:    t,
-				DatumStr: t.Format(layout),
-				Menge:    m,
+		if dt, ok := DataStruct[t.Format(laydt)]; ok {
+			dt.Datasets = append(dt.Datasets, ds{
+				Date:    t,
+				DateStr: t.Format(layout),
+				Amount:    m,
 			})
-			dt.Summe = dt.Summe + m
-			DataStruct[t.Format("2006-01-02")] = dt
+			dt.Sum = dt.Sum + m
+			DataStruct[t.Format(laydt)] = dt
 		} else {
-			DataStruct[t.Format("2006-01-02")] = DB{
-				Datensaetze: []ds{{
-					Datum:    t,
-					DatumStr: t.Format(layout),
-					Menge:    m,
+			DataStruct[t.Format(laydt)] = DB{
+				Datasets: []ds{{
+					Date:    t,
+					DateStr: t.Format(layout),
+					Amount:    m,
 				},
 				},
-				Date:  t.Format("2006-01-02"),
-				Summe: m,
+				Date:  t.Format(laydt),
+				Sum: m,
 			}
 		}
-	} else {
-		t = time.Now()
+		file, _ := json.MarshalIndent(DataStruct, "", " ")
+		_ = ioutil.WriteFile("data.json", file, 0644)
+	} 
+
+	t = time.Now()
 		fz = t.Format("15:04")
 		m = 0
-	}
+	
 
-	file, _ := json.MarshalIndent(DataStruct, "", " ")
-	_ = ioutil.WriteFile("data.json", file, 0644)
-
-	for _, d := range DataStruct[time.Now().Format("2006-01-02")].Datensaetze {
-		sum += d.Menge
+	for _, d := range DataStruct[time.Now().Format(laydt)].Datasets {
+		sum += d.Amount
 	}
+	var TplStruct []DB
+	TplStruct = append(TplStruct, DataStruct[time.Now().Format(laydt)])
 	td = tplData{
-		Data:  DataStruct,
-		Datum: t.Format("2006-01-02"),
-		Zeit:  fz,
-		Summe: sum,
+		Data:  TplStruct,
+		Date: t.Format(laydt),
+		Time:  fz,
+		Sum: sum,
 	}
 	err = tpl.ExecuteTemplate(w, "index.gohtml", td)
 	checkErr(err)
@@ -139,6 +168,32 @@ func details(w http.ResponseWriter, req *http.Request) {
 		err = json.Unmarshal(fdata, &DataStruct)
 		checkErr(err)
 	}
+	for _, fo := range DataStruct {
+		for i, fi := range fo.Datasets {
+			form := req.FormValue(fi.DateStr +"@" +strconv.Itoa(fi.Amount))
+			ddate := fi.Date.Format(laydt) 
+			if len(form) >= 1 {
+				tmpslice := DataStruct[ddate]
+				if len(tmpslice.Datasets) >= 2 {
+					tmpslice.Datasets = append(tmpslice.Datasets[:i], tmpslice.Datasets[i+1:]...)
+				} else if len(tmpslice.Datasets) == i {
+					tmpslice.Datasets = tmpslice.Datasets[:i]
+				} else {
+					tmpslice.Datasets = tmpslice.Datasets[i+1:]
+				}
+				if len(tmpslice.Datasets) != 0 {
+					tmpslice.Sum -= fi.Amount
+					DataStruct[ddate] = tmpslice
+				} else {
+					delete(DataStruct, ddate)
+				}
+				file, _ := json.MarshalIndent(DataStruct, "", " ")
+				_ = ioutil.WriteFile("data.json", file, 0644)
+				break
+			}
+		}
+	}
+
 	err = tpl.ExecuteTemplate(w, "details.gohtml", DataStruct)
 	checkErr(err)
 }
